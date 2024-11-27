@@ -14,11 +14,11 @@ type Point struct {
 	X, Y       int
 	State      pointStateType
 	neighbords []*Point
-	board      *Board
+	board      *board
 	chainId    int
 }
 
-func (p *Point) Init(b *Board, x, y int) {
+func (p *Point) Init(b *board, x, y int) {
 	p.X, p.Y = x, y
 	p.board = b
 	p.linkNeighbords()
@@ -38,70 +38,70 @@ func (p Point) String() string {
 func (p *Point) linkNeighbords() {
 	if p.X == 0 && p.Y == 0 { //top left
 		p.neighbords = []*Point{
-			&(p.board).Field[1][0], //bottom
-			&(p.board).Field[0][1], //right
+			&(p.board).field[1][0], //bottom
+			&(p.board).field[0][1], //right
 		}
 		return
 	}
-	if p.X == p.board.Size-1 && p.Y == 0 { //bottom left
+	if p.X == p.board.size-1 && p.Y == 0 { //bottom left
 		p.neighbords = []*Point{
-			&(p.board).Field[p.board.Size-2][0], //top
-			&(p.board).Field[p.board.Size-1][1], //right
+			&(p.board).field[p.board.size-2][0], //top
+			&(p.board).field[p.board.size-1][1], //right
 		}
 		return
 	}
-	if p.X == 0 && p.Y == p.board.Size-1 { //top right
+	if p.X == 0 && p.Y == p.board.size-1 { //top right
 		p.neighbords = []*Point{
-			&(p.board).Field[0][p.board.Size-2], //left
-			&(p.board).Field[1][p.board.Size-1], //bottom
+			&(p.board).field[0][p.board.size-2], //left
+			&(p.board).field[1][p.board.size-1], //bottom
 		}
 		return
 	}
-	if p.X == p.board.Size-1 && p.Y == p.board.Size-1 { //bottom right
+	if p.X == p.board.size-1 && p.Y == p.board.size-1 { //bottom right
 		p.neighbords = []*Point{
-			&(p.board).Field[p.board.Size-2][p.board.Size-1], //top
-			&(p.board).Field[p.board.Size-1][p.board.Size-2], //left
+			&(p.board).field[p.board.size-2][p.board.size-1], //top
+			&(p.board).field[p.board.size-1][p.board.size-2], //left
 		}
 		return
 	}
 	if p.X == 0 { //top border
 		p.neighbords = []*Point{
-			&(p.board).Field[0][p.Y+1], //right
-			&(p.board).Field[0][p.Y-1], //left
-			&(p.board).Field[1][p.Y],   //bottom
+			&(p.board).field[0][p.Y+1], //right
+			&(p.board).field[0][p.Y-1], //left
+			&(p.board).field[1][p.Y],   //bottom
 		}
 		return
 	}
-	if p.X == p.board.Size-1 { //bottom border
+	if p.X == p.board.size-1 { //bottom border
 		p.neighbords = []*Point{
-			&(p.board).Field[p.board.Size-1][p.Y+1], //right
-			&(p.board).Field[p.board.Size-1][p.Y-1], //left
-			&(p.board).Field[p.board.Size-2][p.Y],   //top
+			&(p.board).field[p.board.size-1][p.Y+1], //right
+			&(p.board).field[p.board.size-1][p.Y-1], //left
+			&(p.board).field[p.board.size-2][p.Y],   //top
 		}
 		return
 	}
 	if p.Y == 0 { //left border
 		p.neighbords = []*Point{
-			&(p.board).Field[p.X+1][0], //bottom
-			&(p.board).Field[p.X-1][0], //top
-			&(p.board).Field[p.X][1],   //right
+			&(p.board).field[p.X+1][0], //bottom
+			&(p.board).field[p.X-1][0], //top
+			&(p.board).field[p.X][1],   //right
 		}
 		return
 	}
-	if p.Y == p.board.Size-1 { //right border
+	if p.Y == p.board.size-1 { //right border
 		p.neighbords = []*Point{
-			&(p.board).Field[p.X+1][p.board.Size-1], //bottom
-			&(p.board).Field[p.X-1][p.board.Size-1], //top
-			&(p.board).Field[p.X][p.board.Size-2],   //left
+			&(p.board).field[p.X+1][p.board.size-1], //bottom
+			&(p.board).field[p.X-1][p.board.size-1], //top
+			&(p.board).field[p.X][p.board.size-2],   //left
 		}
 		return
 	}
 	//not in border or corners, so it has 4 neighbors
 	p.neighbords = []*Point{
-		&(p.board).Field[p.X][p.Y+1], //right
-		&(p.board).Field[p.X][p.Y-1], //left
-		&(p.board).Field[p.X-1][p.Y], //top
-		&(p.board).Field[p.X+1][p.Y], //bottom
+		&(p.board).field[p.X][p.Y+1], //right
+		&(p.board).field[p.X][p.Y-1], //left
+		&(p.board).field[p.X-1][p.Y], //top
+		&(p.board).field[p.X+1][p.Y], //bottom
 	}
 }
 
@@ -117,31 +117,31 @@ func (p *Point) noSameNeighbor() bool {
 
 func (p *Point) checkNeighbors() error {
 	if p.noSameNeighbor() {
-		chId := len(p.board.Chains) + 1
+		chId := len(p.board.chains) + 1
 		p.chainId = chId
 		c, err := NewChain(chId, p)
 		if err != nil {
 			p.chainId = 0
 			return fmt.Errorf("error creating chain: %v", err)
 		}
-		p.board.Chains[chId] = c
+		p.board.chains[chId] = c
 		otherPlayerChains := make(map[int]bool)
 		for _, n := range p.neighbords {
 			if _, seen := otherPlayerChains[n.chainId]; !seen && n.State != FREE && n.State != p.State {
-				p.board.Chains[n.chainId].liberties -= 1
+				p.board.chains[n.chainId].liberties -= 1
 				otherPlayerChains[n.chainId] = true
 			}
 		}
 	} else {
 		playerChains := make(map[int]bool)
-		minChainId := p.board.Size*p.board.Size + 1
+		minChainId := p.board.size*p.board.size + 1
 		for _, n := range p.neighbords {
 			if n.State != FREE {
 				_, seen := playerChains[n.chainId]
 				if seen {
 					continue
 				}
-				p.board.Chains[n.chainId].liberties -= 1
+				p.board.chains[n.chainId].liberties -= 1
 				if n.State == p.State {
 					//pick the chain with the min id to join in and merge the other chains of the same player
 					minChainId = min(minChainId, n.chainId)
@@ -152,10 +152,10 @@ func (p *Point) checkNeighbors() error {
 			}
 		}
 		p.chainId = minChainId
-		p.board.Chains[p.chainId].add(p)
+		p.board.chains[p.chainId].add(p)
 		for c := range playerChains {
 			if c != p.chainId && playerChains[c] {
-				p.board.Chains[p.chainId].merge(p.board.Chains[c])
+				p.board.chains[p.chainId].merge(p.board.chains[c])
 			}
 		}
 	}
@@ -164,7 +164,11 @@ func (p *Point) checkNeighbors() error {
 
 func (p *Point) play(black bool) error {
 	switch p.State {
-	case FREE:
+	case BLACK:
+		return fmt.Errorf("point already taken by black")
+	case WHITE:
+		return fmt.Errorf("point already taken by white")
+	default: //FREE
 		if black {
 			p.State = BLACK
 		} else {
@@ -175,11 +179,5 @@ func (p *Point) play(black bool) error {
 			return fmt.Errorf("error during neighbors checking: %v", err)
 		}
 		return nil
-	case BLACK:
-		return fmt.Errorf("point already taken by black")
-	case WHITE:
-		return fmt.Errorf("point already taken by white")
-	default:
-		return fmt.Errorf("invalid point state %v", p.State)
 	}
 }

@@ -5,37 +5,33 @@ import (
 	"strings"
 )
 
-type Board struct {
-	Size            int //board is size x size
-	Field           [][]Point
-	Chains          map[int]*Chain
-	BlackPlayedLast bool
+type board struct {
+	size   int //board is size x size
+	field  [][]Point
+	chains map[int]*chain
 }
 
-func NewBoard(s int) (*Board, error) {
-	if s <= 0 {
-		return nil, fmt.Errorf("invalid board size (%v x %v)", s, s)
-	}
-	board := Board{Size: s}
-	board.Chains = make(map[int]*Chain)
-	board.Field = make([][]Point, s)
+func newBoard(s int) (*board, error) {
+	board := board{size: s}
+	board.chains = make(map[int]*chain)
+	board.field = make([][]Point, s)
 	for i := 0; i < s; i++ {
-		board.Field[i] = make([]Point, s)
+		board.field[i] = make([]Point, s)
 	}
 	for i := 0; i < s; i++ {
 		for j := 0; j < s; j++ {
-			board.Field[i][j].Init(&board, i, j)
+			board.field[i][j].Init(&board, i, j)
 		}
 	}
 	return &board, nil
 }
 
-func (b Board) String() string {
+func (b board) String() string {
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Size: %v, Chains: %v\n", b.Size, len(b.Chains)))
-	for x := range b.Field {
-		for y := range b.Field[x] {
-			sb.WriteString(b.Field[x][y].String())
+	sb.WriteString(fmt.Sprintf("Size: %v | Chains: %v\n", b.size, len(b.chains)))
+	for x := range b.field {
+		for y := range b.field[x] {
+			sb.WriteString(b.field[x][y].String())
 			sb.WriteString(" ")
 		}
 		sb.WriteString("\n")
@@ -43,27 +39,31 @@ func (b Board) String() string {
 	return sb.String()
 }
 
-func (b *Board) Play(x, y int, black bool) error { //black is true if the play is from black stones player
-	if x < 0 || x > (b.Size-1) || y < 0 || y > (b.Size-1) {
-		return fmt.Errorf("invalid position (%v, %v)", x, y)
+func (b *board) play(x, y int, black bool) (int, error) { //black is true if the play is from black stones player
+	if x < 0 || x > (b.size-1) || y < 0 || y > (b.size-1) {
+		return 0, fmt.Errorf("invalid position (%v, %v)", x, y)
 	}
-	if b.BlackPlayedLast == black {
-		switch b.BlackPlayedLast {
-		case true:
-			return fmt.Errorf("invalid turn. now white must play")
-		default:
-			return fmt.Errorf("invalid turn. now black must play")
-		}
-	}
-	err := b.Field[x][y].play(black)
+	err := b.field[x][y].play(black)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	b.BlackPlayedLast = !b.BlackPlayedLast
-	b.check(x, y)
-	return nil
+	return b.check(black), nil
 }
 
-func (b *Board) check(x, y int) { //TODO: deberia chequear los chains que no tienen libertad y capturarlos
+func (b *board) deleteChain(cid int) (captured int) {
+	captured = len(b.chains[cid].points)
+	b.chains[cid].free()
+	delete(b.chains, cid)
+	return
+}
 
+func (b *board) check(black bool) int {
+	captured := 0
+	for cid := range b.chains {
+		if b.chains[cid].isBlack != black && b.chains[cid].liberties == 0 {
+			n := b.deleteChain(cid)
+			captured += n
+		}
+	}
+	return captured
 }

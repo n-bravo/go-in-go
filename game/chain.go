@@ -2,15 +2,15 @@ package game
 
 import "fmt"
 
-type Chain struct {
+type chain struct {
 	id        int
 	isBlack   bool
-	board     *Board
+	board     *board
 	points    []*Point
 	liberties int
 }
 
-func NewChain(id int, p *Point) (*Chain, error) {
+func NewChain(id int, p *Point) (*chain, error) {
 	l := 0
 	for _, n := range p.neighbords {
 		if n.State == p.State {
@@ -20,17 +20,17 @@ func NewChain(id int, p *Point) (*Chain, error) {
 			l += 1
 		}
 	}
-	c := Chain{id: id, isBlack: p.State == BLACK, board: p.board, points: make([]*Point, 1), liberties: l}
+	c := chain{id: id, isBlack: p.State == BLACK, board: p.board, points: make([]*Point, 1), liberties: l}
 	c.points[0] = p
 	return &c, nil
 }
 
-func (c *Chain) add(p *Point) {
+func (c *chain) add(p *Point) {
 	c.points = append(c.points, p)
 	c.updateLiberties()
 }
 
-func (c *Chain) updateLiberties() {
+func (c *chain) updateLiberties() {
 	l := 0
 	seenFree := make(map[*Point]bool)
 	for _, p := range c.points {
@@ -44,11 +44,18 @@ func (c *Chain) updateLiberties() {
 	c.liberties = l
 }
 
-func (c1 *Chain) merge(c2 *Chain) {
+func (c1 *chain) merge(c2 *chain) {
 	for _, p2 := range c2.points {
 		p2.chainId = c1.id
 	}
 	c1.points = append(c1.points, c2.points...)
 	c1.updateLiberties()
-	delete(c1.board.Chains, c2.id)
+	delete(c1.board.chains, c2.id)
+}
+
+func (c *chain) free() {
+	for _, p := range c.points {
+		p.State = FREE
+	}
+	c.board = nil
 }

@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	b, _ := game.NewBoard(5)
+	b, _ := game.NewGame(5)
 	var err error
 	err = b.Play(1, 1, true)
 	if err != nil {

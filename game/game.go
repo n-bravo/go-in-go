@@ -59,3 +59,8 @@ func (g *GoGame) Play(x, y int, black bool) error {
 	g.BlackPlayedLast = !g.BlackPlayedLast
 	return nil
 }
+
+func (g *GoGame) Close() error {
+	g.board = nil
+	return nil
+}

@@ -1,38 +1,17 @@
 package main
 
 import (
-	"fmt"
 	"log"
-
-	"github.com/n-bravo/go-in-go/game"
+	"net/http"
+	"github.com/gorilla/websocket"
+	"github.com/n-bravo/go-in-go/server"
 )
 
 func main() {
-	b, _ := game.NewGame(5)
-	var err error
-	err = b.Play(1, 1, true)
-	if err != nil {
-		log.Fatal(err)
+	webSocketHandler := server.WebSocketHandler{
+		Upgrader: websocket.Upgrader{},
 	}
-	err = b.Play(1, 2, false)
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = b.Play(1, 3, true)
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = b.Play(3, 3, false)
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = b.Play(4, 3, true)
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = b.Play(0, 2, false)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(b)
+	http.Handle("/", webSocketHandler)
+	log.Print("Starting server...")
+	log.Fatal(http.ListenAndServe(":3000", nil))
 }

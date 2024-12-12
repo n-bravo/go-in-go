@@ -3,6 +3,7 @@ package server
 import (
 	"log"
 	"net/http"
+
 	"github.com/gorilla/websocket"
 )
 
@@ -13,7 +14,7 @@ type WebSocketHandler struct {
 var Manager *SessionManager = NewSessionManager()
 
 func (wsh WebSocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	c, err := wsh.Upgrader.Upgrade(w, r, nil)
+	c, err := wsh.Upgrader.Upgrade(w, r, nil)	
 	if err != nil {
 		log.Printf("error %s when upgrading connection to websocket", err)
 		return
@@ -22,6 +23,9 @@ func (wsh WebSocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	for {
 		if err = c.ReadJSON(&m); err != nil {
 			log.Printf("Error %s when reading handshake message from client", err)
+			if websocket.IsCloseError(err) || websocket.IsUnexpectedCloseError(err) {
+				return
+			}
 			continue
 		}
 		if m.SessionId == "" { //create new session
@@ -43,4 +47,3 @@ func (wsh WebSocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 }
-

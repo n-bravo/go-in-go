@@ -32,19 +32,26 @@ func newSession(c *websocket.Conn, n int, online bool, m *SessionManager) (*sess
 	if err = s.conn.WriteJSON(&NewSessionMessage{SessionId: s.id}); err != nil {
 		return nil, fmt.Errorf("error when sending new session information to client: %s", err)
 	}
-	go s.mainLoop()
+	if online {
+		
+	} else {
+		go s.offlineLoop()
+	}
 	return &s, nil
 }
 
-func (s *session) mainLoop() {
+func (s *session) offlineLoop() {
 	defer s.m.CloseSession(s)
 	for {
 		var err error
 		var input PlayerInputMessage
 		if err = s.conn.ReadJSON(&input); err != nil {
-			msg := fmt.Sprintf("Error when reading input from client: %s", err)
+			msg := fmt.Sprintf("Error when reading input from client from session: %s", s.id)
 			log.Println(msg)
-			return
+			if websocket.IsCloseError(err) || websocket.IsUnexpectedCloseError(err) {
+				return
+			}
+			continue
 		}
 		if input.CloseSession {
 			log.Printf("Client request close session %s", s.id)

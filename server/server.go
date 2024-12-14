@@ -35,14 +35,11 @@ func (wsh WebSocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				c.WriteJSON(&ResponseMessage{Code: 401, Message: msg})
 				continue
 			}
-			if m.Online {
-				msg := "error no online support yet"
-				log.Println(msg)
-				c.WriteJSON(&ResponseMessage{Code: 401, Message: msg})
-				continue
-			}
 			log.Printf("Creating new session")
 			Manager.NewSession(c, m.Size, m.Online)
+			return
+		} else {
+			Manager.JoinSession(m.SessionId, c)
 			return
 		}
 	}

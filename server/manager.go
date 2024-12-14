@@ -10,13 +10,13 @@ import (
 
 type SessionManager struct {
 	mu       sync.Mutex
-	sessions map[*session]bool
+	sessions map[session]bool
 }
 
 func NewSessionManager() *SessionManager {
 	uuid.EnableRandPool()
 	return &SessionManager{
-		sessions: make(map[*session]bool),
+		sessions: make(map[session]bool),
 	}
 }
 
@@ -33,8 +33,20 @@ func (m *SessionManager) NewSession(c *websocket.Conn, size int, online bool) {
 	}()
 }
 
-func (m *SessionManager) CloseSession(s *session) {
-	if err := s.close(); err != nil {
+func (m *SessionManager) JoinSession(id string, c *websocket.Conn) {
+	for s := range m.sessions {
+		if s.getId() == id {
+			if err := s.addPlayer(c); err != nil {
+				log.Printf("error %s", err)
+				return
+			}
+			break	
+		}
+	}
+}
+
+func (m *SessionManager) CloseSession(s session, con *websocket.Conn) {
+	if err := s.close(con); err != nil {
 		log.Fatal(err)
 	}
 	go func() {

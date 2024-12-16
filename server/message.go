@@ -21,6 +21,7 @@ type OnlinePlayerInputMessage struct {
 
 type NewSessionMessage struct {
 	SessionId string `json:"sessionId"`
+	Online    bool   `json:"online"`
 }
 
 type ResponseMessage struct {

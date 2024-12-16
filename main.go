@@ -10,6 +10,7 @@ import (
 func main() {
 	webSocketHandler := server.WebSocketHandler{
 		Upgrader: websocket.Upgrader{},
+		Origins: []string{"http://localhost:5500", "http://127.0.0.1:5500"},
 	}
 	http.Handle("/", webSocketHandler)
 	log.Print("Starting server...")

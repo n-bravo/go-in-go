@@ -33,23 +33,26 @@ func (m *SessionManager) NewSession(c *websocket.Conn, size int, online bool) {
 	}()
 }
 
+func (m *SessionManager) SessionExists(id string) bool {
+	for s := range m.sessions {
+		if s.getId() == id {
+			return true
+		}
+	}
+	return false
+}
+
 func (m *SessionManager) JoinSession(id string, c *websocket.Conn) {
 	for s := range m.sessions {
 		if s.getId() == id {
-			if err := s.addPlayer(c); err != nil {
-				log.Printf("error %s", err)
-				return
-			}
-			break	
+			s.addPlayer(c)
+			return
 		}
 	}
 }
 
-func (m *SessionManager) CloseSession(s session, con *websocket.Conn) {
-	if err := s.close(con); err != nil {
-		log.Fatal(err)
-	}
-	go func() {
+func (m *SessionManager) CloseSession(s session) {
+	go func(){
 		m.mu.Lock()
 		delete(m.sessions, s)
 		m.mu.Unlock()

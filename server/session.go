@@ -45,7 +45,7 @@ func newSession(c *websocket.Conn, n int, online bool, m *SessionManager) (sessi
 			g:    g,
 			m:    m,
 		}
-		if err = s.con1.WriteJSON(&NewSessionMessage{SessionId: s.id, Online: true}); err != nil {
+		if err = s.con1.WriteJSON(&NewSessionMessage{SessionId: s.id, Online: true, BlackSide: true}); err != nil {
 			return nil, fmt.Errorf("error when sending new session information to client: %s", err)
 		}
 		go s.mainLoop()
@@ -57,7 +57,7 @@ func newSession(c *websocket.Conn, n int, online bool, m *SessionManager) (sessi
 			g:    g,
 			m:    m,
 		}
-		if err = s.conn.WriteJSON(&NewSessionMessage{SessionId: s.id, Online: false}); err != nil {
+		if err = s.conn.WriteJSON(&NewSessionMessage{SessionId: s.id, Online: false, BlackSide: true}); err != nil {
 			return nil, fmt.Errorf("error when sending new session information to client: %s", err)
 		}
 		go s.mainLoop()
@@ -88,12 +88,13 @@ func (s *onlineSession) addPlayer(c *websocket.Conn) {
 		log.Printf("Player 1 joined to session %s", s.id)
 		go s.onlinePlayerLoop(true)
 		s.con1 = c
+        c.WriteJSON(&NewSessionMessage{SessionId: s.id, Online: true, BlackSide: true, BStatus: s.g.String()})
 	} else {
 		log.Printf("Player 2 joined to session %s", s.id)
 		go s.onlinePlayerLoop(false)
 		s.con2 = c
+        c.WriteJSON(&NewSessionMessage{SessionId: s.id, Online: true, BlackSide: false, BStatus: s.g.String()})
 	}
-	c.WriteJSON(&NewSessionMessage{SessionId: s.id, Online: true})
 }
 
 func (s *offlineSession) mainLoop() {
@@ -167,11 +168,16 @@ func (s *onlineSession) onlinePlayerLoop(black bool) {
 			msg := fmt.Sprintf("Invalid request from client %s [%s]: %s", string(pname), s.id, err)
 			log.Println(msg)
 			con.WriteJSON(&ResponseMessage{Code: 401, Message: msg})
-			s.mu.Unlock()
 			continue
 		}
+        status := s.g.String()
 		s.mu.Unlock()
-		con.WriteJSON(&ResponseMessage{Code: 200, Message: ""})
+        con.WriteJSON(&ResponseMessage{Code: 200, Message: "", BStatus: status})
+        if con == s.con1 {
+            s.con2.WriteJSON(&ResponseMessage{Code: 200, Message: "", BStatus: status})
+        } else {
+            s.con1.WriteJSON(&ResponseMessage{Code: 200, Message: "", BStatus: status})
+        }
 	}
 }
 

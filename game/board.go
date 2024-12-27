@@ -28,13 +28,10 @@ func newBoard(s int) (*board, error) {
 
 func (b board) String() string {
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Size: %v | Chains: %v\n", b.size, len(b.chains)))
 	for x := range b.field {
 		for y := range b.field[x] {
 			sb.WriteString(b.field[x][y].String())
-			sb.WriteString(" ")
 		}
-		sb.WriteString("\n")
 	}
 	return sb.String()
 }

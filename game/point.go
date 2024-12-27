@@ -30,7 +30,7 @@ func (p Point) String() string {
 		return "B"
 	case WHITE:
 		return "W"
-	default: //FREE
+default: //FREE
 		return "*"
 	}
 }

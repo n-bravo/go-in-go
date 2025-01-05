@@ -33,9 +33,9 @@ func (m *SessionManager) NewSession(c *websocket.Conn, size int, online bool) {
 	}()
 }
 
-func (m *SessionManager) SessionExists(id string) bool {
+func (m *SessionManager) OnlineSessionExists(id string) bool {
 	for s := range m.sessions {
-		if s.getId() == id {
+		if s.isOnline() && s.getId() == id {
 			return true
 		}
 	}

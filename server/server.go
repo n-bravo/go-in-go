@@ -53,8 +53,8 @@ func (wsh WebSocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			Manager.NewSession(c, m.Size, m.Online)
 			return
 		} else {
-			if !Manager.SessionExists(m.SessionId) {
-				msg := fmt.Sprintf("session id %s not found", m.SessionId)
+			if !Manager.OnlineSessionExists(m.SessionId) {
+				msg := fmt.Sprintf("online session id %s not found", m.SessionId)
 				log.Println(msg)
 				c.WriteJSON(&ResponseMessage{Code: 401, Message: msg})
 				c.Close();

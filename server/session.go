@@ -14,6 +14,7 @@ type session interface {
 	getId() string
 	mainLoop()
 	addPlayer(c *websocket.Conn)
+    isOnline() bool
 	close(con *websocket.Conn) error
 }
 
@@ -71,6 +72,14 @@ func (s *offlineSession) getId() string {
 
 func (s *onlineSession) getId() string {
 	return s.id
+}
+
+func (s *offlineSession) isOnline() bool {
+    return false
+}
+
+func (s *onlineSession) isOnline() bool {
+    return true
 }
 
 func (s *offlineSession) addPlayer(c *websocket.Conn) {

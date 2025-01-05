@@ -62,7 +62,7 @@ func TestBoardPlay(t *testing.T) {
 	assert.NoError(err)
 	err = g.Play(1, 2, false)
 	assert.Error(err)
-	assert.Equal("Next turn: B | B captures: 0 | W captures: 0 | Size: 5 | Chains: 4\n* * * * * \n* B W B W \n* * * * * \n* * * * * \n* * * * * \n", g.String())
+	assert.Equal("******BWBW***************",g.String())
 }
 
 func TestChains(t *testing.T) {

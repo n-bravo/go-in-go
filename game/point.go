@@ -30,7 +30,7 @@ func (p Point) String() string {
 		return "B"
 	case WHITE:
 		return "W"
-default: //FREE
+	default: //FREE
 		return "*"
 	}
 }
@@ -162,6 +162,19 @@ func (p *Point) checkNeighbors() error {
 	return nil
 }
 
+func (p *Point) updateNeighborsLiberties(black bool) {
+	seenChainIds := make(map[int]bool)
+	for _, n := range p.neighbords {
+		if seenChainIds[n.chainId] {
+			continue
+		}
+		if n.board.chains[n.chainId].isBlack != black {
+			n.board.chains[n.chainId].liberties += 1
+			seenChainIds[n.chainId] = true
+		}
+	}
+}
+
 func (p *Point) play(black bool) error {
 	switch p.State {
 	case BLACK:
@@ -180,4 +193,8 @@ func (p *Point) play(black bool) error {
 		}
 		return nil
 	}
+}
+
+func (p *Point) free() {
+	p.State = FREE
 }

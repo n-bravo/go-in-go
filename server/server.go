@@ -42,7 +42,7 @@ func (wsh WebSocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if m.SessionId == "" { //create new session
-			if m.Size != 19 {
+			if m.Size != 19 && m.Size != 5 {
 				msg := "error invalid board size"
 				log.Println(msg)
 				c.WriteJSON(&ResponseMessage{Code: 401, Message: msg})

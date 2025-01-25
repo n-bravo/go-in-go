@@ -62,7 +62,7 @@ func TestBoardPlay(t *testing.T) {
 	assert.NoError(err)
 	err = g.Play(1, 2, false)
 	assert.Error(err)
-	assert.Equal("******BWBW***************",g.String())
+	assert.Equal("******BWBW***************", g.String())
 }
 
 func TestChains(t *testing.T) {
@@ -125,4 +125,57 @@ func TestChains(t *testing.T) {
 	assert.Equal(4, g.board.chains[2].liberties)
 	assert.Equal(2, g.board.chains[3].liberties)
 	assert.Same(&g.board.field[4][4], g.board.chains[3].points[0])
+}
+
+func TestWhiteCapturesMultipleBlackWithMiddleMove(t *testing.T) {
+	//      B B W * B
+	//      * W B W *
+	//      W B * B W
+	//      * W B W *
+	//      B * W * B
+	//      	|
+	//      	| white turn
+	//      	V
+	//      B B W * B
+	//      * W * W *
+	//      W * W * W
+	//      * W * W *
+	//      B * W * B
+	assert := assert.New(t)
+	g, _ := NewGame(5)
+	g.Play(1, 2, true)
+	g.Play(0, 2, false)
+	g.Play(2, 1, true)
+	g.Play(2, 0, false)
+	g.Play(3, 2, true)
+	g.Play(4, 2, false)
+	g.Play(2, 3, true)
+	g.Play(2, 4, false)
+	g.Play(0, 0, true)
+	g.Play(1, 1, false)
+	g.Play(4, 0, true)
+	g.Play(3, 1, false)
+	g.Play(0, 4, true)
+	g.Play(1, 3, false)
+	g.Play(4, 4, true)
+	g.Play(3, 3, false)
+	g.Play(0, 1, true)
+	err := g.Play(2, 2, false)
+	assert.NoError(err)
+	assert.Equal("BBW*B*W*W*W*W*W*W*W*B*W*B", g.String())
+}
+
+func TestNoSelfCapture(t *testing.T) {
+	assert := assert.New(t)
+	g, _ := NewGame(5)
+	g.Play(0, 1, true)
+	g.Play(0, 3, false)
+	g.Play(1, 1, true)
+	g.Play(1, 3, false)
+	g.Play(1, 0, true)
+	err := g.Play(0, 0, false)
+	assert.Error(err)
+	g.Play(1, 4, false)
+	err = g.Play(0, 4, true)
+	assert.Error(err)
 }

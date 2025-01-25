@@ -26,14 +26,7 @@ func NewGame(n int) (*GoGame, error) {
 }
 
 func (g GoGame) String() string {
-	//var nextTurn string
-	//if g.BlackPlayedLast {
-	//	nextTurn = "W"
-	//} else {
-	//	nextTurn = "B"
-	//}
 	var sb strings.Builder
-	//sb.WriteString(fmt.Sprintf("Next turn: %v | B captures: %v | W captures: %v | ", nextTurn, g.BlackCaptures, g.WhiteCaptures))
 	sb.WriteString(g.board.String())
 	return sb.String()
 }

@@ -1,6 +1,10 @@
 package game
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+	"strings"
+)
 
 type chain struct {
 	id        int
@@ -23,6 +27,29 @@ func NewChain(id int, p *Point) (*chain, error) {
 	c := chain{id: id, isBlack: p.State == BLACK, board: p.board, points: make([]*Point, 1), liberties: l}
 	c.points[0] = p
 	return &c, nil
+}
+
+func (c *chain) encode() string {
+	var sb strings.Builder
+	if c.isBlack {
+		sb.WriteString("1")
+	} else {
+		sb.WriteString("0")
+	}
+	sb.WriteString("-")
+	sb.WriteString(strconv.Itoa(c.id))
+	sb.WriteString("-")
+	sb.WriteString(strconv.Itoa(c.liberties))
+	sb.WriteString("-")
+	for i, p := range c.points {
+		sb.WriteString(strconv.Itoa(p.X))
+		sb.WriteString(",")
+		sb.WriteString(strconv.Itoa(p.Y))
+		if i < (len(c.points) - 1) {
+			sb.WriteString("|")
+		}
+	}
+	return sb.String()
 }
 
 func (c *chain) add(p *Point) {
@@ -55,6 +82,7 @@ func (c1 *chain) merge(c2 *chain) {
 
 func (c *chain) free() {
 	for _, p := range c.points {
+		p.updateNeighborsLiberties(p.State == BLACK)
 		p.State = FREE
 	}
 	c.board = nil

@@ -30,4 +30,4 @@ go run .
 ## Server messages
 
 The websocket server comunicates with the client with a series of messages in JSON format,
-defined in `server/message.go`:
+defined in [`server/message.go`](/server/message.go):

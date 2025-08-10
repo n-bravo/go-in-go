@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+
 	"github.com/gorilla/websocket"
 	"github.com/n-bravo/go-in-go/server"
 )
@@ -10,7 +11,7 @@ import (
 func main() {
 	webSocketHandler := server.WebSocketHandler{
 		Upgrader: websocket.Upgrader{},
-        Origins: []string{"http://localhost:5173", "http://127.0.0.1:517:!"},
+		Origins:  []string{"http://localhost:5173", "http://127.0.0.1:5173"},
 	}
 	http.Handle("/", webSocketHandler)
 	log.Print("Starting server...")

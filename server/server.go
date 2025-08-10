@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"slices"
 
 	"github.com/gorilla/websocket"
 )
@@ -18,12 +19,7 @@ var Manager *SessionManager = NewSessionManager()
 func (wsh WebSocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	upgrader := wsh.Upgrader
 	upgrader.CheckOrigin = func(r *http.Request) bool {
-		for _, o := range wsh.Origins {
-			if r.Header["Origin"][0] == o {
-				return true
-			}
-		}
-		return false
+		return slices.Contains(wsh.Origins, r.Header["Origin"][0])
 	}
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -35,10 +31,10 @@ func (wsh WebSocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if err = c.ReadJSON(&m); err != nil {
 			log.Printf("Error %s when reading handshake message from client", err)
 			if websocket.IsCloseError(err) || websocket.IsUnexpectedCloseError(err) {
-				c.Close();
+				c.Close()
 				return
 			}
-			c.Close();
+			c.Close()
 			return
 		}
 		if m.SessionId == "" { //create new session
@@ -46,7 +42,7 @@ func (wsh WebSocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				msg := "error invalid board size"
 				log.Println(msg)
 				c.WriteJSON(&ResponseMessage{Code: 401, Message: msg})
-				c.Close();
+				c.Close()
 				return
 			}
 			log.Printf("Creating new session")
@@ -57,7 +53,7 @@ func (wsh WebSocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				msg := fmt.Sprintf("online session id %s not found", m.SessionId)
 				log.Println(msg)
 				c.WriteJSON(&ResponseMessage{Code: 401, Message: msg})
-				c.Close();
+				c.Close()
 				return
 			}
 			Manager.JoinSession(m.SessionId, c)
